@@ -1,0 +1,4 @@
+# Ignore artifacts:
+.nuxt
+node_modules
+outputs

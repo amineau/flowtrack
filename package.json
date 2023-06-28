@@ -1,0 +1,32 @@
+{
+  "name": "geotracker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "initdb": "ts-node --esm ./scripts/init-db.ts"
+  },
+  "dependencies": {
+    "@mapbox/polyline": "^1.2.0",
+    "@sidebase/nuxt-auth": "^0.6.0-beta.2",
+    "@vue-leaflet/vue-leaflet": "^0.9.0",
+    "leaflet": "^1.9.4",
+    "leaflet-fullscreen": "^1.0.2",
+    "nuxt": "^3.5.2",
+    "pg": "^8.11.0",
+    "pg-hstore": "^2.3.4",
+    "sass": "^1.63.6",
+    "sequelize": "^6.32.1",
+    "sequelize-typescript": "^2.1.5",
+    "strava-v3": "^2.2.0"
+  },
+  "devDependencies": {
+    "@element-plus/nuxt": "^1.0.5",
+    "element-plus": "^2.3.7",
+    "prettier": "^2.8.8"
+  }
+}
