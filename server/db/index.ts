@@ -1,8 +1,9 @@
 import { Sequelize } from "sequelize";
 import User from "./user";
 import Activity from "./activity";
+import Stream from "./stream";
 
-const models = [User, Activity];
+const models = [User, Activity, Stream];
 
 const sequelize = new Sequelize({
   dialect: "postgres",
@@ -40,6 +41,6 @@ const syncDb = async () => {
   console.log("... synchronization Ok");
 };
 
-// syncDb()
+// syncDb();
 
 export default db;

@@ -73,4 +73,29 @@ router.get(
   })
 );
 
+router.get(
+  "/:id/stream",
+  defineEventHandler(async (event) => {
+    const id = getRouterParam(event, "id");
+    if (isNaN(parseInt(id))) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: "Invalid id",
+      });
+    }
+
+    const streams = await db.models.Stream.findAll({
+      where: { ActivityId: id },
+      attributes: ["type", "data"],
+    });
+    if (streams.length === 0) {
+      throw createError({
+        statusCode: 404,
+        statusMessage: "Activity not found",
+      });
+    }
+    return streams;
+  })
+);
+
 export default useBase("/api/activity", router.handler);
