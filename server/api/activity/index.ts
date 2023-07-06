@@ -24,10 +24,13 @@ export default defineEventHandler(async (event) => {
       "averageSpeed",
       [
         db.sequelize.literal("ST_SimplifyPreserveTopology(polyline, 0.0005)"),
-        "polylineSymplified",
+        "polyline",
       ],
+      [db.sequelize.literal("ST_Centroid(polyline)"), "centroid"],
+      [db.sequelize.literal("ST_Extent(polyline)::geometry"), "boundingBox"],
     ],
     sort: ["startDate"],
+    group: ["id"],
   });
   // meta: await db.models.Activity.findOne({
   //   attributes: [

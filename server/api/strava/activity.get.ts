@@ -6,7 +6,7 @@ import polyline from "@mapbox/polyline";
 const getActivities = async (accessToken: string) => {
   return await strava.athlete.listActivities({
     access_token: accessToken,
-    per_page: 5,
+    per_page: 30,
   });
 };
 
