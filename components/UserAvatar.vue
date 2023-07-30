@@ -1,12 +1,10 @@
 <template>
-  <div class="el-menu-item">
-    <el-avatar
-      class="avatar"
-      :size="40"
-      :src="user.image"
-      :alt="user.name"
-    ></el-avatar
-    >Antoine
+  <div
+    class="relative inline-flex items-center justify-center w-10 h-10 overflow-hidden bg-gray-100 rounded-full dark:bg-gray-900"
+  >
+    <span class="font-medium text-gray-600 dark:text-gray-300">{{
+      user.username.slice(0, 2).toUpperCase()
+    }}</span>
   </div>
 </template>
 
@@ -18,9 +16,3 @@ defineProps({
   },
 });
 </script>
-
-<style scoped>
-.avatar {
-  margin-right: 10px;
-}
-</style>

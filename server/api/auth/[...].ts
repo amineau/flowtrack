@@ -1,80 +1,99 @@
-import StravaProvider from "next-auth/providers/strava";
-import { NuxtAuthHandler } from "#auth";
-import type { Account, Session } from "next-auth";
-import type { StravaProfile } from "next-auth/providers/strava";
-import type { JWT } from "next-auth/jwt";
-import db from "@/server/db";
+import { createRouter, useBase } from "h3";
+import authService from "@/server/db/service/auth";
+import userService from "@/server/db/service/user";
 
-const config = useRuntimeConfig();
-export default NuxtAuthHandler({
-  // A secret string you define, to ensure correct encryption
-  secret: `${config.secret}`,
-  providers: [
-    // @ts-expect-error You need to use .default here for it to work during SSR. May be fixed via Vite at some point
-    StravaProvider.default({
-      clientId: `${config.stravaClientId}`,
-      clientSecret: `${config.stravaClientSecret}`,
-      authorization: {
-        url: "https://www.strava.com/api/v3/oauth/authorize",
-        params: {
-          scope: "read_all,profile:read_all,activity:read_all",
-          approval_prompt: "auto",
-          response_type: "code",
-        },
-      },
-    }),
-  ],
-  callbacks: {
-    async jwt({
-      token,
-      account,
-    }: {
-      token: JWT;
-      account: Account | null;
-    }): Promise<JWT> {
-      if (account) {
-        token = Object.assign({}, token, {
-          accessToken: account.access_token,
-          refreshToken: account.refresh_token,
-          expiresAt: account.expires_at,
-        });
-      }
-      return token;
-    },
-    async session({
-      session,
-      token,
-    }: {
-      session: Session;
-      token: JWT;
-    }): Promise<Session> {
-      if (session) {
-        session = Object.assign({}, session, {
-          accessToken: token.accessToken,
-          refreshToken: token.refreshToken,
-        });
-      }
-      return session;
-    },
-    async signIn({
-      profile,
-    }: {
-      profile: StravaProfile;
-    }): Promise<string | boolean> {
-      db.models.User.findOrCreate({
-        where: {
-          stravaId: profile.id,
-        },
-        defaults: {
-          firstname: profile.firstname,
-          lastname: profile.lastname,
-          stravaId: profile.id,
-        },
-      }).then(([user, created]: [Model, boolean]) => {
-        user.lastLogin = new Date();
-        user.save();
+const router = createRouter();
+
+router.post(
+  "/login",
+  defineWrappedResponseHandler(async (event) => {
+    console.log("/login");
+    const body = await readBody(event);
+    const { email, password } = body;
+    if (!email || !password) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: "Missing email or password",
       });
-      return true;
-    },
-  },
-});
+    }
+    try {
+      const user = await authService.login({ email, password });
+      const session = await authService.createSession(user.id);
+      return { token: session.token, expiresAt: session.expiresAt };
+    } catch (error: any) {
+      throw createError({
+        statusCode: 403,
+        statusMessage: error.message,
+      });
+    }
+  })
+);
+
+router.post(
+  "/register",
+  defineWrappedResponseHandler(async (event) => {
+    const body = await readBody(event);
+    const { email, password, username } = body;
+    if (!email || !password || !username) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: "Missing email or password",
+      });
+    }
+    const existingUser = await userService.getByEmail(email);
+    if (existingUser) {
+      throw createError({
+        statusCode: 403,
+        statusMessage: "User already exists",
+      });
+    }
+    const user = await authService.register({ email, password, username });
+    if (!user) {
+      throw createError({
+        statusCode: 500,
+        statusMessage: "Failed to create user",
+      });
+    }
+    return { success: true };
+  })
+);
+
+router.post(
+  "/logout",
+  defineWrappedResponseHandler(async (event) => {
+    console.log("/logout");
+    const token = event.context.session.token;
+    await authService.deleteSession(token);
+    return { success: true };
+  })
+);
+
+router.get(
+  "/session",
+  defineWrappedResponseHandler(async (event) => {
+    const authorization = getHeader(event, "Authorization");
+    if (!authorization) {
+      throw createError({
+        statusCode: 403,
+        statusMessage: "Missing authorization header",
+      });
+    }
+    const token = authorization.replace(/^Bearer /, "");
+    if (!token) {
+      throw createError({
+        statusCode: 403,
+        statusMessage: "Missing token",
+      });
+    }
+    const user = await authService.getUser(token);
+    if (!user) {
+      throw createError({
+        statusCode: 403,
+        statusMessage: "Invalid token",
+      });
+    }
+    return { user };
+  })
+);
+
+export default useBase("/api/auth", router.handler);

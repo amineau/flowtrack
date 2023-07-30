@@ -1,12 +1,6 @@
 <template>
   <div class="h-full w-full">
-    <l-map
-      ref="mapComponent"
-      v-model:zoom="zoom"
-      v-model:center="center"
-      @ready="onMapReady()"
-      :useGlobalLeaflet="true"
-    >
+    <l-map ref="mapComponent" @ready="onMapReady()" :useGlobalLeaflet="true">
       <l-control-layers position="topright"></l-control-layers>
       <l-tile-layer
         v-for="tileProvider in tileProviders"
@@ -20,13 +14,12 @@
       <l-polyline
         ref="polylineComponent"
         :key="activity.id"
-        :latLngs="activity.polyline.coordinates"
-        :visible="activity.visible"
+        :latLngs="(activity.polyline as L.LatLngExpression[])"
       />
     </l-map>
   </div>
 </template>
-<script setup>
+<script setup lang="ts">
 import L from "leaflet";
 import {
   LMap,
@@ -35,16 +28,15 @@ import {
   LControlLayers,
 } from "@vue-leaflet/vue-leaflet";
 import "leaflet-fullscreen";
+import type { Activity } from "@prisma/client";
 
-const props = defineProps({
-  activity: Object,
-});
+const props = defineProps<{
+  activity: Activity;
+}>();
 
 const mapComponent = ref(null);
 const polylineComponent = ref(null);
-const center = ref(props.activity.centroid.coordinates);
-const bounds = props.activity.boundingBox.coordinates;
-const zoom = ref(6);
+
 const tileProviders = [
   {
     name: "OpenStreetMap",
@@ -76,9 +68,9 @@ onBeforeMount(async () => {});
 const onMapReady = async () => {
   const map = mapComponent.value.leafletObject;
   const polyline = polylineComponent.value.leafletObject;
+  const bounds = polyline.getBounds();
   map.fitBounds(bounds, { padding: [50, 50] });
   polyline.on("mouseover", (e) => {
-    console.log(e.target);
     e.target.setStyle({ weight: 6 });
   });
   polyline.on("mouseout", (e) => {

@@ -1,14 +1,23 @@
 <template>
-  <div class="dark">
-    <div
-      class="w-screen min-h-screen bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 flex flex-col"
-    >
-      <Header />
-      <div class="max-w-screen-lg mx-auto grow">
+  <div class="dark:bg-slate-950">
+    <Navbar :user="data?.user" />
+    <Sidebar v-if="status === 'authenticated'" />
+
+    <div class="p-4 sm:ml-64 min-h-screen">
+      <div
+        class="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700 mt-14"
+      >
         <slot />
       </div>
-      <Footer />
     </div>
   </div>
 </template>
-<script setup></script>
+<script setup lang="ts">
+import { initDropdowns } from "flowbite";
+
+const { data, status } = useAuth();
+
+onMounted(() => {
+  initDropdowns();
+});
+</script>

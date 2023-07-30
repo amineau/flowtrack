@@ -7,18 +7,26 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare",
-    "initdb": "ts-node --esm ./scripts/init-db.ts"
+    "postinstall": "nuxt prepare"
   },
   "overrides": {
     "vue": "latest"
   },
   "dependencies": {
+    "@garmin-fit/sdk": "^21.115.0",
     "@mapbox/polyline": "^1.2.0",
+    "@nuxtjs/tailwindcss": "^6.8.0",
     "@pinia/nuxt": "^0.4.11",
-    "@sidebase/nuxt-auth": "^0.6.0-beta.2",
+    "@prisma/client": "^5.0.0",
+    "@sidebase/nuxt-auth": "^0.6.0-beta.3",
+    "@types/geojson": "^7946.0.10",
+    "@types/leaflet": "^1.9.3",
     "@vue-leaflet/vue-leaflet": "^0.9.0",
+    "bcrypt": "^5.1.0",
+    "dayjs": "^1.11.9",
     "flowbite": "^1.7.0",
+    "jsonwebtoken": "^9.0.1",
+    "jwt-decode": "^3.1.2",
     "leaflet": "^1.9.4",
     "leaflet-fullscreen": "^1.0.2",
     "nuxt": "^3.5.2",
@@ -26,14 +34,13 @@
     "pg": "^8.11.0",
     "pg-hstore": "^2.3.4",
     "pinia": "^2.1.4",
+    "prettier": "^2.8.8",
+    "prisma": "^5.0.0",
     "sass": "^1.63.6",
-    "sequelize": "^6.32.1",
-    "sequelize-typescript": "^2.1.5",
     "strava-v3": "^2.2.0"
   },
   "devDependencies": {
-    "@nuxtjs/strapi": "^1.9.3",
-    "@nuxtjs/tailwindcss": "^6.8.0",
-    "prettier": "^2.8.8"
+    "@nuxt/devtools": "^0.6.7",
+    "@types/mapbox__polyline": "^1.0.2"
   }
 }

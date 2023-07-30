@@ -2,8 +2,6 @@
   <div class="h-full">
     <l-map
       ref="mapComponent"
-      v-model:zoom="zoom"
-      v-model:center="center"
       :options="mapOptions"
       @ready="onMapReady()"
       :useGlobalLeaflet="true"
@@ -19,8 +17,7 @@
       <l-polyline
         ref="polylineComponent"
         :key="activity.id"
-        :latLngs="activity.polyline.coordinates"
-        :visible="activity.visible"
+        :latLngs="activity.summaryPolyline"
       />
     </l-map>
   </div>
@@ -35,9 +32,7 @@ const props = defineProps({
 
 const mapComponent = ref(null);
 const polylineComponent = ref(null);
-const center = ref(props.activity.centroid.coordinates);
-const bounds = props.activity.boundingBox.coordinates;
-const zoom = ref(6);
+
 const mapOptions = ref({
   zoomControl: false,
   attributionControl: false,
@@ -63,6 +58,10 @@ const tileProviders = [
 onBeforeMount(async () => {});
 const onMapReady = async () => {
   const map = mapComponent.value.leafletObject;
+  const polyline = polylineComponent.value.leafletObject;
+  const bounds = polyline.getBounds();
+  const center = bounds.getCenter();
+  map.center = center;
   map.fitBounds(bounds, { padding: [0, 0] });
 };
 </script>

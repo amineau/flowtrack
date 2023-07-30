@@ -1,0 +1,84 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         Int        @id @default(autoincrement())
+  email      String     @unique
+  username   String
+  password   String
+  lastLogin  DateTime?
+  city       String?
+  state      String?
+  country    String?
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  activities Activity[]
+  sessions   Session[]
+  appTokens  AppToken[]
+}
+
+model Session {
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now())
+  expiresAt DateTime?
+  token     String    @unique @default(uuid())
+  userId    Int
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AppToken {
+  id           Int        @id @default(autoincrement())
+  appName      String
+  accessToken  String     @unique
+  refreshToken String     @unique
+  tokenType    String
+  createdAt    DateTime   @default(now())
+  expiresAt    DateTime?
+  userId       Int
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activities   Activity[]
+
+  @@unique([appName, userId])
+}
+
+model Activity {
+  id                 Int       @id @default(autoincrement())
+  externalId         String?
+  name               String
+  distance           Float?
+  movingTime         Float?
+  elapsedTime        Float?
+  totalElevationGain Float?
+  averageSpeed       Float?
+  startDateLocal     DateTime
+  startDate          DateTime
+  startLngLat        Float[]
+  endLngLat          Float[]
+  polyline           Json?
+  summaryPolyline    Json?
+  createdAt          DateTime  @default(now())
+  synchronized       Boolean   @default(false)
+  updatedAt          DateTime  @updatedAt
+  appTokenId         Int?
+  appToken           AppToken? @relation(fields: [appTokenId], references: [id], onDelete: SetNull)
+  userId             Int
+  user               User      @relation(fields: [userId], references: [id])
+  streams            Stream[]
+}
+
+model Stream {
+  id         Int      @id @default(autoincrement())
+  type       String
+  data       Json
+  activityId Int
+  activity   Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+}

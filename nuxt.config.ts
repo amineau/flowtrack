@@ -1,36 +1,41 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   modules: [
-    "@sidebase/nuxt-auth",
-    "@pinia/nuxt",
-    "@nuxtjs/strapi",
-    "@nuxtjs/tailwindcss",
     "nuxt-highcharts",
+    "@nuxt/devtools",
+    "@pinia/nuxt",
+    "@sidebase/nuxt-auth",
+    "@nuxtjs/tailwindcss",
   ],
-  strapi: {
-    url: process.env.STRAPI_URL || "http://localhost:1337",
-    prefix: "/api",
-    version: "v4",
-    cookie: {},
-    cookieName: "strapi_jwt",
+
+  devtools: {
+    // Enable devtools (default: true)
+    enabled: false,
+    // VS Code Server options
+    vscode: {},
   },
+
   auth: {
-    // baseURL: process.env.AUTH_ORIGIN,
-    // provider: {
-    //   type: "authjs",
-    //   defaultProvider: "strava",
-    // },
-    baseURL: (process.env.STRAPI_URL || "http://localhost:1337") + "/api/auth",
+    baseURL: "/api/auth",
     provider: {
       type: "local",
+      pages: {
+        login: "/user/login",
+      },
       endpoints: {
-        signIn: { path: "/local", method: "post" },
-        signOut: undefined,
-        signUp: { path: "/local/register", method: "post" },
-        getSession: undefined,
+        signIn: { path: "/login", method: "post" },
+        signOut: { path: "/logout", method: "post" },
+        signUp: { path: "/register", method: "post" },
+        getSession: { path: "/session", method: "get" },
+      },
+      token: {
+        signInResponseTokenPointer: "/token",
+        type: "Bearer",
+        headerName: "Authorization",
+        maxAgeInSeconds: 60 * 60 * 24, // 24 hours
       },
     },
-    // globalAppMiddleware: true,
+    globalAppMiddleware: true,
   },
   runtimeConfig: {
     stravaClientId: "",

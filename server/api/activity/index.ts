@@ -1,46 +1,21 @@
-import db from "@/server/db";
-
+import activityService from "@/server/db/service/activity";
+import { Prisma } from "@prisma/client";
 interface Query {
-  page?: number;
-  per_page?: number;
+  take?: string;
+  cursorId?: string;
+  include?: string;
 }
 
-export default defineEventHandler(async (event) => {
-  const { page = 1, per_page = 0 }: Query = getQuery(event);
-
-  const activities = await db.models.Activity.findAll({
-    ...(per_page > 0 && {
-      limit: per_page,
-      offset: (Math.max(1, page) - 1) * per_page,
-    }),
-    attributes: [
-      "id",
-      "name",
-      "distance",
-      "startDate",
-      "movingTime",
-      "elapsedTime",
-      "totalElevationGain",
-      "averageSpeed",
-      [
-        db.sequelize.literal("ST_SimplifyPreserveTopology(polyline, 0.0005)"),
-        "polyline",
-      ],
-      [db.sequelize.literal("ST_Centroid(polyline)"), "centroid"],
-      [db.sequelize.literal("ST_Extent(polyline)::geometry"), "boundingBox"],
-    ],
-    sort: ["startDate"],
-    group: ["id"],
-  });
-  // meta: await db.models.Activity.findOne({
-  //   attributes: [
-  //     [db.sequelize.literal("ST_Extent(polyline)::geometry"), "boundingBox"],
-  //     [
-  //       db.sequelize.literal("ST_Centroid(ST_Extent(polyline)::geometry)"),
-  //       "centroid",
-  //     ],
-  //   ],
-  // }),
-
+export default defineWrappedResponseHandler(async (event) => {
+  const { take, cursorId, include }: Query = getQuery(event);
+  const activities = await activityService.getByUserId(
+    event.context.session.user.id,
+    {
+      take: (take && parseInt(take)) || undefined,
+      cursorId: (cursorId && parseInt(cursorId)) || undefined,
+      include: ((include && JSON.parse(include)) ||
+        undefined) as Prisma.ActivitySelect,
+    }
+  );
   return activities;
 });

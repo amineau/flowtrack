@@ -9,3 +9,7 @@ dist
 .DS_Store
 .fleet
 .idea
+
+.vscode
+output.json
+*.fit
